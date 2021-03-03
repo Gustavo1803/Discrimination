@@ -17,7 +17,7 @@ lapply(packages, pkgTest)
 ######3.Load Data Sets#################
 
 ##Set WD local
-setwd("C:/Users/genin/Box Sync/Discrimination/data")
+setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination")
 
 ## Load Data Shared Drive
 rechomes <- read.csv("rechomes.csv")
@@ -59,7 +59,7 @@ rechomes$minority[rechomes$RACEID == 16 | rechomes$RACEID == 26 | rechomes$RACEI
 rechomes$minority <- as.factor(rechomes$minority)
 
 ## preprocess rhgeo
-rhgeo$CONTROL <- rhgeo$ï..CONTROL
+rhgeo$CONTROL <- rhgeo$?..CONTROL
 
 ## preprocess tester
 tester$TESTERID <- tester$TCID
