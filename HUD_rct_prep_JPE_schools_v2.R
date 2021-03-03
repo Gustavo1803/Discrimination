@@ -59,7 +59,7 @@ rechomes$minority[rechomes$RACEID == 16 | rechomes$RACEID == 26 | rechomes$RACEI
 rechomes$minority <- as.factor(rechomes$minority)
 
 ## preprocess rhgeo
-rhgeo$CONTROL <- rhgeo$?..CONTROL
+rhgeo$CONTROL <- rhgeo$ï..CONTROL
 
 ## preprocess tester
 tester$TESTERID <- tester$TCID
@@ -80,10 +80,7 @@ tester$SubAsian <- as.numeric(tester$TASIANG)
 tester$SubHispanic <- as.numeric(tester$THISPUBG)
 tester$APRACE[tester$SubAsian ==1 | tester$SubAsian == 2 | tester$SubAsian == 3| tester$SubAsian == 4 | tester$SubAsian == 5 | tester$SubAsian == 6] <- 4
 tester$APRACE[tester$SubHispanic ==1 | tester$SubHispanic == 2 | tester$SubHispanic == 3| tester$SubHispanic == 4 | tester$SubHispanic == 5 | tester$SubHispanic == 6 | tester$SubHispanic == 7 | tester$SubHispanic == 8] <- 3
-
 tester$APRACE <- as.factor(tester$APRACE)
-
-
 tester$TASIANG <- as.factor(tester$TASIANG)
 tester$THISPUBG[tester$THISPUBG ==8] <- -1
 tester$THISPUBG <- as.factor(tester$THISPUBG)
@@ -91,19 +88,18 @@ tester$THHEGAI <- as.factor(tester$THHEGAI)
 tester$TPEGAI <- as.factor(tester$TPEGAI)
 tester$THIGHEDU <- as.factor(tester$THIGHEDU)
 
-
-# Merge with addresses on trial
- #rechomes_rhgeo <- merge(rechomes, rhgeo, by = c("CONTROL", "TESTERID", "SEQRH"))
+#####5. Merge Initial Data Sets################
+## Merge with addresses on trial
 rechomes_rhgeo_sales <- merge(rechomes,sales, by = c("CONTROL", "TESTERID"))
 rechomes_rhgeo_sales_tester <- merge(rechomes_rhgeo_sales, tester, by = c("TESTERID"))
 rechomes_rhgeo_sales_assignment <- merge(rechomes_rhgeo_sales_tester, assignment, by = c("CONTROL", "TESTERID"))
 
-
-#split data into advertised and recommended
+#####6. Split Data for Advertised and Recommended#########
+###split data into advertised and recommended
 ads <- subset(rechomes_rhgeo_sales_assignment, HADHOME==1)
 recs <- subset(rechomes_rhgeo_sales_assignment, HADHOME==0)
 
-# preprocess recs 
+    # preprocess recs 
 recs$RACE_Rec <- as.factor(recs$RACEID.x)
 recs$logRecPrice <- as.numeric(log(recs$HPRICE + 1))
 recs$Superfund_Proximity_Rec <- as.numeric(recs$Superfund_Proximity)
@@ -123,7 +119,7 @@ recs$HSTATE_Rec <- as.character(recs$HSTATE)
 recs$HZIP_Rec <- as.character(recs$HZIP)
 
 
-# preprocess ads 
+    # preprocess ads 
 ads$RACE_Ad <- as.factor(ads$RACEID.x)
 ads$logAdPrice <- as.numeric(log(ads$HPRICE + 1))
 ads$Superfund_Proximity_Ad <- as.numeric(ads$Superfund_Proximity)
@@ -139,18 +135,12 @@ ads$HINT1_Ad <- as.factor(ads$HINT1)
 ads$Minority_Population_Ad <- as.numeric(ads$Minority_Population.)
 ads$Low_Income_Population_Ad <- as.numeric(ads$Low_Income_Population.)
 
+######7. Merge Trial###########
 # Merge on trial
 recs_trial <- merge(recs,ads, by = c("CONTROL", "TESTERID"))
 
+######8. Export Dataset#######
 
-# Final dataset
-
-#recs_trial_nomiss <- recs_trial[c("CONTROL", "TESTERID", "white.x", "black.x", "hispanic.x", "asian.x", "natamer.x", "RACE_Rec", "pctwhite_Ad", "pctwhite_Rec", "logAdPrice", "logRecPrice", "Superfund_Proximity_Rec", "Diesel_PM_Rec", "Air_Toxics_Cancer_Risk_Rec", "RespiratoryHazardIndex_Rec", "Superfund_Proximity_Ad", "Diesel_PM_Ad", "Air_Toxics_Cancer_Risk_Ad", "RespiratoryHazardIndex_Ad", "HCITY.x.x", "SEQUENCE.x.x", "month.x", "zip_Ad", "stfid_Ad", "High_School_Score_Rec", "Assault_Rec", "High_School_Score_Ad", "Assault_Ad", "ARELATE2.x", "HHMTYPE.x", "SAVLBAD.x", "STOTUNIT_Rec", "SAPPTAM.x", "AAGE1.x", "TSEX.x")]
-#recs_trial_nomiss <- recs_trial[c("CONTROL", "TESTERID", "white.x", "black.x", "hispanic.x", "asian.x", "natamer.x", "RACE_Rec", "pctwhite_Ad", "pctwhite_Rec", "logAdPrice", "logRecPrice", "Superfund_Proximity_Rec", "Diesel_PM_Rec", "Air_Toxics_Cancer_Risk_Rec", "RespiratoryHazardIndex_Rec", "Superfund_Proximity_Ad", "Diesel_PM_Ad", "Air_Toxics_Cancer_Risk_Ad", "RespiratoryHazardIndex_Ad", "HCITY.x.x", "SEQUENCE.x.x", "month.x", "zip_Ad", "stfid_Ad", "High_School_Score_Rec", "Assault_Rec", "High_School_Score_Ad", "Assault_Ad", "ARELATE2.x", "HHMTYPE.x", "SAVLBAD.x", "STOTUNIT_Rec", "SAPPTAM.x")]
-#recs_trial_nomiss <- recs_trial[c("CONTROL", "TESTERID", "white.x", "minority.x", "black.x", "hispanic.x", "asian.x", "natamer.x", "other.x", "RACE_Rec", "pctwhite_Ad", "pctwhite_Rec", "logAdPrice", "logRecPrice", "Superfund_Proximity_Rec", "Diesel_PM_Rec", "Air_Toxics_Cancer_Risk_Rec", "RespiratoryHazardIndex_Rec", "Superfund_Proximity_Ad", "Diesel_PM_Ad", "Air_Toxics_Cancer_Risk_Ad", "RespiratoryHazardIndex_Ad", "HCITY.x.x", "SEQUENCE.x.x", "month.x", "zip_Ad", "stfid_Ad", "High_School_Score_Rec", "Assault_Rec", "High_School_Score_Ad", "Assault_Ad", "ARELATE2.x", "HHMTYPE.x", "SAVLBAD.x", "STOTUNIT_Rec", "SAPPTAM.x", "HINT1_Ad", "HINT1_Rec")]
 recs_trial_final <- recs_trial[c("CONTROL", "TESTERID", "white.x", "minority.x", "black.x", "hispanic.x", "asian.x", "natamer.x", "other.x", "APRACE.x", "TASIANG.x", "THISPUBG.x", "RACE_Rec", "pctwhite_Ad", "pctwhite_Rec", "Minority_Population_Rec", "Low_Income_Population_Rec", "Low_Income_Population_Ad", "Minority_Population_Ad",  "logAdPrice", "logRecPrice", "Superfund_Proximity_Rec", "Diesel_PM_Rec", "Air_Toxics_Cancer_Risk_Rec", "RespiratoryHazardIndex_Rec", "Superfund_Proximity_Ad", "Diesel_PM_Ad", "Air_Toxics_Cancer_Risk_Ad", "RespiratoryHazardIndex_Ad", "HCITY.x", "SEQUENCE.x.x", "month.x", "zip_Ad", "stfid_Ad", "High_School_Score_Rec", "Assault_Rec", "High_School_Score_Ad", "Assault_Ad", "ARELATE2.x", "HHMTYPE.x", "SAVLBAD.x", "STOTUNIT_Rec", "SAPPTAM.x", "HINT1_Ad", "HINT1_Rec", "TSEX.x.x", "age.x", "THHEGAI.x", "TPEGAI.x", "THIGHEDU.x", "TCURTENR.x", "HSITEAD_Rec", "HCITY_Rec", "HSTATE_Rec", "HZIP_Rec")]
-
 recs_trial_final <-subset(recs_trial_final, other.x==0)
-saveRDS(recs_trial_final, "projects/HUD_Discrimination/stores/HUDprocessed_JPE.rds")
-#saveRDS(ads, "projects/HUD_Discrimination/stores/adsprocessed_JPE.rds")
-#saveRDS(recs, "projects/HUD_Discrimination/stores/recsprocessed_JPE.rds")
+saveRDS(recs_trial_final, "HUDprocessed_JPE.rds")
