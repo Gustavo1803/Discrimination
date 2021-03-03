@@ -17,7 +17,7 @@ lapply(packages, pkgTest)
 ######3.Load Data Sets#################
 
 ##Set WD local
-setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination")
+setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
 
 ## Load Data Shared Drive
 rechomes <- read.csv("rechomes.csv")
