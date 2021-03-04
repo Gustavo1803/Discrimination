@@ -1,7 +1,7 @@
 #######1.Clearing old workspace#########
 rm(list = ls()) 
 
-#######2.Load Packages##################
+#######2.Load Packages and Set Environment##################
 pkgTest <- function(x) {
   if (!require(x, character.only = TRUE))
   {
@@ -13,8 +13,6 @@ pkgTest <- function(x) {
 ## These lines load the required packages
 packages <- c("readxl", "readstata13", "lfe", "Synth","data.table", "plm", "ggplot2", "MatchIt", "experiment", "stargazer")
 lapply(packages, pkgTest)
-
-######3.Load Data Sets#################
 
 ##Set WD local
 setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
@@ -30,92 +28,40 @@ setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
 # Model 4: treatment effect also conditional on racial composition of block group of recommended listing
 # Model 5: treatment effect also conditional on price of recommended home
 
+######3.Load Data Sets#################
+
 # All models cluster standard errors by trial 
-recs_trial_final <- readRDS("projects/HUD_Discrimination/stores/HDS_processeddata/HUDprocessed.rds")
+recs_trial_final <- readRDS("HUDprocessed_JPE.rds")
+
+######4. Clean Data####################
 
 #construct separate indicators for market and control
 recs_trial_final$market <- as.factor(sapply(strsplit(recs_trial_final$CONTROL, "-"), `[`, 1))
 recs_trial_final$CONTROL <- as.factor(recs_trial_final$CONTROL)
-
 
 #construct indicators for race groups
 recs_trial_final$ofcolor <- 0
 recs_trial_final$ofcolor[recs_trial_final$APRACE.x==2] <- 1
 recs_trial_final$ofcolor[recs_trial_final$APRACE.x==3] <- 1
 recs_trial_final$ofcolor[recs_trial_final$APRACE.x==4] <- 1
-#recs_trial_final$black[recs_trial_final$THISPUBG==1] <- 1
 recs_trial_final$ofcolor <- as.factor(recs_trial_final$ofcolor)
 
 #construct indicators for agent race
-recs_trial_final$SAGRACE1_Rec[recs_trial_final$SAGRACE1_Rec == -1 | recs_trial_final$SAGRACE1_Rec == 7 | recs_trial_final$SAGRACE1_Rec == 8 | recs_trial_final$SAGRACE1_Rec == 9] <- NA
 recs_trial_final$race <- recs_trial_final$APRACE.x
 recs_trial_final$race[recs_trial_final$race==5] <- NA
-recs_trial_final$sameraceagent <- 0
-recs_trial_final$sameraceagent[recs_trial_final$SAGMETP1_Rec== 1 & as.character(recs_trial_final$SAGRACE1_Rec)==as.character(recs_trial_final$race)] <- 1
-recs_trial_final$sameraceagent <- as.factor(recs_trial_final$sameraceagent)
-
-
-recs_trial_final$blackagent <- 0
-recs_trial_final$blackagent[recs_trial_final$SAGMETP1_Rec== 1 & recs_trial_final$SAGRACE1_Rec==2] <- 1
-recs_trial_final$blackagent <- as.factor(recs_trial_final$blackagent)
-
-recs_trial_final$whiteagent <- 0
-recs_trial_final$whiteagent[recs_trial_final$SAGMETP1_Rec== 1 & recs_trial_final$SAGRACE1_Rec==1] <- 1
-recs_trial_final$whiteagent <- as.factor(recs_trial_final$whiteagent)
-
-recs_trial_final$hispagent <- 0
-recs_trial_final$hispagent[recs_trial_final$SAGMETP1_Rec== 1 & recs_trial_final$SAGRACE1_Rec==3] <- 1
-recs_trial_final$hispagent <- as.factor(recs_trial_final$hispagent)
-
+recs_trial_final_hp <- subset(recs_trial_final, AdPrice > 245000)
 
 # outcomes at mean price and racial composition
 recs_trial_final <- subset(recs_trial_final, RecPrice<10000000)
-recs_trial_final$RecPriceBins <- cut(as.numeric(recs_trial_final$RecPrice), seq(from = 0, to = 10000000, by = 20000))
-recs_trial_final$PovRateLocalPrice <- ave(recs_trial_final$povrate_Rec, recs_trial_final$RecPriceBins, FUN = mean)
-recs_trial_final$SkillLocalPrice <- ave(recs_trial_final$skill_Rec, recs_trial_final$RecPriceBins, FUN = mean)
-recs_trial_final$CollegeLocalPrice <- ave(recs_trial_final$college_Rec, recs_trial_final$RecPriceBins, FUN = mean)
-recs_trial_final$Elementary_School_ScoreLocalPrice <- ave(recs_trial_final$Elementary_School_Score_Rec, recs_trial_final$RecPriceBins, FUN = mean)
-recs_trial_final$AssaultLocalPrice <- ave(recs_trial_final$Assault_Rec, recs_trial_final$RecPriceBins, FUN = mean)
-
-# outcomes at mean price and racial composition
-summary(recs_trial_final$w2012pc_Rec)
-recs_trial_final$w2012pc_RecBins <- cut(as.numeric(recs_trial_final$w2012pc_Rec), seq(from = 0, to = 1, by = .05))
-recs_trial_final$PovRateLocalw <- ave(recs_trial_final$povrate_Rec, recs_trial_final$w2012pc_RecBins, FUN = mean)
-recs_trial_final$SkillLocalw <- ave(recs_trial_final$skill_Rec, recs_trial_final$w2012pc_RecBins, FUN = mean)
-recs_trial_final$CollegeLocalw <- ave(recs_trial_final$college_Rec, recs_trial_final$w2012pc_RecBins, FUN = mean)
-recs_trial_final$Elementary_School_ScoreLocalw <- ave(recs_trial_final$Elementary_School_Score_Rec, recs_trial_final$w2012pc_RecBins, FUN = mean)
-recs_trial_final$AssaultLocalw <- ave(recs_trial_final$Assault_Rec, recs_trial_final$w2012pc_RecBins, FUN = mean)
-
 recs_trial_final_men <- subset(recs_trial_final, TSEX.x.x==1)
 recs_trial_final_kids <- subset(recs_trial_final, kids.x==1)
+recs_trial_final_sqft <- subset(recs_trial_final, Sqft_Ad > 1872)
 
 # Advertised home in neighborhood above 50th percentile white = w2012pc_Ad > .7405
 recs_trial_final$white <- 0
 recs_trial_final$white[recs_trial_final$APRACE.x==1] <- 1
-recs_trial_final$whitebg_Ad <- 0
-recs_trial_final$whitebg_Ad[recs_trial_final$w2012pc_Ad > .7405] <- 1
-recs_trial_final$blackbg_Ad <- 0
-recs_trial_final$blackbg_Ad[recs_trial_final$b2012pc_Ad > .03017] <- 1
-recs_trial_final$asianbg_Ad <- 0
-recs_trial_final$asianbg_Ad[recs_trial_final$a2012pc_Ad > .03086] <- 1
-recs_trial_final$hispbg_Ad <- 0
-recs_trial_final$hispbg_Ad[recs_trial_final$hisp2012pc_Ad > .06991] <- 1
 
-# Define median price of advertised home
-recs_trial_final$highprice_Ad <- 0
-recs_trial_final$highprice_Ad[recs_trial_final$AdPrice > 245000] <- 1
-recs_trial_final_hp <- subset(recs_trial_final, AdPrice > 245000)
-
-# Define median sqft of advertised home
-recs_trial_final$highsqft_Ad <- 0
-recs_trial_final$highsqft_Ad[recs_trial_final$Sqft_Ad > 1872] <- 1
-recs_trial_final_sqft <- subset(recs_trial_final, Sqft_Ad > 1872)
-
-# Define median sqft of advertised home
-recs_trial_final$beds <- 0
-recs_trial_final$beds[recs_trial_final$HBEDRMS.x > 2] <- 1
-
-
+######5. Estimates ##############################
 
 #NEIGHBORHOOD POVERTY RATES
 ## Poverty rates are based on American Community Survey definitions by Census block group
@@ -127,7 +73,6 @@ PR4_ <- felm(povrate_Rec ~ APRACE.x + povrate_Ad + w2012pc_Ad + b2012pc_Ad + a20
 
 summary(PR4)
 summary(PR4_)
-
 
 
 # STEERING AND NEIGHBORHOOD HIGH Skill  
@@ -142,8 +87,6 @@ summary(SK4)
 summary(SK4_)
 
 
-
-
 # STEERING INTO HIGHLY EDUCATED NEIGHBORHOODS 
 ## College is share of census block group with at least a college education
 
@@ -154,9 +97,6 @@ COL4_ <- felm(college_Rec ~ APRACE.x + college_Ad + w2012pc_Ad + b2012pc_Ad + a2
 
 summary(COL4)
 summary(COL4_)
-
-
-
 
 
 # STEERING and ELEMENTARY School Quality
@@ -205,8 +145,8 @@ PM4 <- felm(PM25_Rec ~ ofcolor + PM25_Ad + w2012pc_Ad + b2012pc_Ad + a2012pc_Ad 
 PM4_ <- felm(PM25_Rec ~ APRACE.x + PM25_Ad + w2012pc_Ad + b2012pc_Ad + a2012pc_Ad + hisp2012pc_Ad + logAdPrice | CONTROL + SEQUENCE.x.x + month.x + HCITY.x + market + ARELATE2.x + HHMTYPE.x + SAVLBAD.x + STOTUNIT_Rec + SAPPTAM.x + TSEX.x.x + THHEGAI.x + TPEGAI.x + THIGHEDU.x + TCURTENR.x +  ALGNCUR.x + AELNG1.x + DPMTEXP.x + AMOVERS.x + age.x + ALEASETP.x + ACAROWN.x | 0 | CONTROL, data = recs_trial_final)
 
 
+#######Table 8 Estimates################
 
-### GENERATE TABLES
 out <- "projects/HUD_Discrimination/views/tables/"
 out <- "C:/Users/pchrist/Desktop/"
 
