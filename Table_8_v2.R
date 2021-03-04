@@ -31,7 +31,8 @@ setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
 ######3.Load Data Sets#################
 
 # All models cluster standard errors by trial 
-recs_trial_final <- readRDS("HUDprocessed_JPE.rds")
+#recs_trial_final <- readRDS("HUDprocessed_JPE.rds")
+recs_trial_final <- readRDS("HUDprocessed.rds")
 
 ######4. Clean Data####################
 
