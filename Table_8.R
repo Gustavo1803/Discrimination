@@ -1,8 +1,7 @@
-#Clearing old workspace
+#######1.Clearing old workspace#########
 rm(list = ls()) 
 
-#Load Packages
-## \Roaming\Microsoft\Windows\Network Shortcuts\share (141.142.208.117 (netshare-backup server (Samba, Ubuntu)))
+#######2.Load Packages##################
 pkgTest <- function(x) {
   if (!require(x, character.only = TRUE))
   {
@@ -10,13 +9,15 @@ pkgTest <- function(x) {
     if(!require(x, character.only = TRUE)) stop("Package not found")
   }
 }
+
 ## These lines load the required packages
 packages <- c("readxl", "readstata13", "lfe", "Synth","data.table", "plm", "ggplot2", "MatchIt", "experiment", "stargazer")
 lapply(packages, pkgTest)
 
-#Set WD local
-setwd("//141.142.208.117/share")
+######3.Load Data Sets#################
 
+##Set WD local
+setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
 
 ## Housing Search  ######################################################################################################
 
