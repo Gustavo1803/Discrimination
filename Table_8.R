@@ -31,7 +31,7 @@ setwd("C:/Users/genin/OneDrive/Documents/Git/Discrimination/data")
 # Model 5: treatment effect also conditional on price of recommended home
 
 # All models cluster standard errors by trial 
-recs_trial_final <- readRDS("projects/HUD_Discrimination/stores/HDS_processeddata/HUDprocessed.rds")
+recs_trial_final <- readRDS("HUDprocessed.rds")
 
 #construct separate indicators for market and control
 recs_trial_final$market <- as.factor(sapply(strsplit(recs_trial_final$CONTROL, "-"), `[`, 1))
